@@ -1,0 +1,12 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: #e9edf0;
+}
+.container {
+  width: var(--main-layout-width);
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+}
