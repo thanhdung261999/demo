@@ -6,6 +6,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // import { Provider } from "react-redux";
 // import { createStore } from "redux";
 // import rootReducer from "./store/reducers/rootReducer";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Admin from "./components/Admin/Admin";
+import User from "./components/User/User";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 // const reduxStore = createStore(
@@ -13,9 +16,15 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 //   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 // );
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  // <React.StrictMode>
+  <Router>
+    <Routes>
+      <Route path="/" element={<App />} />
+      <Route path="/admins" element={<Admin />} />
+      <Route path="/users" element={<User />} />
+    </Routes>
+  </Router>
+  // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
