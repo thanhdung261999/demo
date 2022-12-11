@@ -1,16 +1,16 @@
 import Header from "./components/Header/Header";
-import { Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 function App() {
   return (
-    <div className="App">
-      <Header />
-      <div>test link</div>
-      <button>
-        <Link to="/users">go to user page</Link>
-      </button>
-      <button>
-        <Link to="/admins">go to Admin page</Link>
-      </button>
+    <div className="app-container">
+      <div className="header-container">
+        <Header />
+      </div>
+      <div className="man-container"></div>
+      <div className="sidenav-container"></div>
+      <div className="app-content">
+        <Outlet />
+      </div>
     </div>
   );
 }
