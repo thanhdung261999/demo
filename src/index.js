@@ -9,7 +9,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Admin from "./components/Admin/Admin";
 import User from "./components/User/User";
-
+import HomePage from "./components/Home/HomePage";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 // const reduxStore = createStore(
 //   rootReducer,
@@ -20,9 +20,10 @@ root.render(
   <Router>
     <Routes>
       <Route path="/" element={<App />}>
-        <Route path="/admins" element={<Admin />} />
+        <Route index element={<HomePage />} />
         <Route path="/users" element={<User />} />
       </Route>
+      <Route path="/admins" element={<Admin />} />
     </Routes>
   </Router>
   // </React.StrictMode>
