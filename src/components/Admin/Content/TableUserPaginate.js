@@ -1,11 +1,18 @@
 import ReactPaginate from "react-paginate";
 const TableUserPagiate = (props) => {
-  const { listUser, handleClickBtnUpdate, handleClickBtnDelete, pageCount } =
-    props;
+  const {
+    listUser,
+    handleClickBtnUpdate,
+    handleClickBtnDelete,
+    pageCount,
+    currentPage,
+    setCurrentPage,
+  } = props;
   //   const [pageCount, setPageCount] = useState(6);
   // Invoke when user click to request another page.
   const handlePageClick = (event) => {
     props.fetchListUserWithPaninate(+event.selected + 1);
+    setCurrentPage(+event.selected + 1);
   };
   return (
     <>
@@ -48,19 +55,19 @@ const TableUserPagiate = (props) => {
             })}
           {listUser && listUser.length === 0 && (
             <tr>
-              <th colSpan="4">Not found data</th>
+              <th colSpan="5">Not found data</th>
             </tr>
           )}
         </tbody>
       </table>
       <div className="d-flex justify-content-center">
         <ReactPaginate
-          nextLabel="next >"
+          nextLabel="Next >"
           onPageChange={handlePageClick}
           pageRangeDisplayed={3}
           marginPagesDisplayed={2}
           pageCount={pageCount}
-          previousLabel="< previous"
+          previousLabel="< Prev"
           pageClassName="page-item"
           pageLinkClassName="page-link"
           previousClassName="page-item"
@@ -73,6 +80,7 @@ const TableUserPagiate = (props) => {
           containerClassName="pagination"
           activeClassName="active"
           renderOnZeroPageCount={null}
+          forcePage={currentPage - 1}
         />
       </div>
     </>

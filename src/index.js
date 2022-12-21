@@ -1,36 +1,24 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.min.css";
-// import { Provider } from "react-redux";
-// import { createStore } from "redux";
-// import rootReducer from "./store/reducers/rootReducer";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Admin from "./components/Admin/Admin";
-import User from "./components/User/User";
-import HomePage from "./components/Home/HomePage";
-import ManageUser from "./components/Admin/Content/ManageUser";
-import DashBoar from "./components/Admin/Content/DashBoar";
+import { Provider } from "react-redux";
+import { BrowserRouter as Router } from "react-router-dom";
+import Layout from "./Layout";
+import "nprogress/nprogress.css";
+import { persistor, store } from "./redux/store";
+import { PersistGate } from "redux-persist/lib/integration/react";
 const root = ReactDOM.createRoot(document.getElementById("root"));
-// const reduxStore = createStore(
-//   rootReducer,
-//   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-// );
+
 root.render(
   // <React.StrictMode>
-  <Router>
-    <Routes>
-      <Route path="/" element={<App />}>
-        <Route index element={<HomePage />} />
-        <Route path="/users" element={<User />} />
-      </Route>
-      <Route path="/admins" element={<Admin />}>
-        <Route index element={<DashBoar />} />
-        <Route path="manage-user" element={<ManageUser />} />
-      </Route>
-    </Routes>
-  </Router>
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <Router>
+        <Layout />
+      </Router>
+    </PersistGate>
+  </Provider>
   // </React.StrictMode>
 );
 

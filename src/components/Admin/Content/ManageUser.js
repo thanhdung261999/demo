@@ -2,13 +2,12 @@ import ModalCreateUser from "./ModelCreateUser";
 import "./ManageUser.scss";
 import { FcPlus } from "react-icons/fc";
 import { useState, useEffect } from "react";
-import TableUser from "./TableUser";
 import { getAllUser, getUserWithPanigate } from "../../../services/apiServices";
 import ModalUpdateUser from "./ModelUpdateUser";
 import ModalDeleteUser from "./ModalDeleteUser";
 import TableUserPagiate from "./TableUserPaginate";
 const ManageUser = () => {
-  const LIMIT_USER = 6;
+  const LIMIT_USER = 5;
   const [showModalCreateUser, setShowModalCreateUser] = useState(false);
   const [showModalUpdateUser, setShowModalUpdateUser] = useState(false);
   const [dataUpdate, setDataUpdate] = useState({});
@@ -16,6 +15,7 @@ const ManageUser = () => {
   const [dataDelete, setDataDelete] = useState({});
   const [listUser, setListUser] = useState([]);
   const [pageCount, setPageCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     // fetchListUser();
@@ -61,22 +61,23 @@ const ManageUser = () => {
           </button>
         </div>
       </div>
-      {/* <TableUser
-        listUser={listUser}
-        handleClickBtnUpdate={handleClickBtnUpdate}
-        handleClickBtnDelete={handleClickBtnDelete}
-      /> */}
+
       <TableUserPagiate
         pageCount={pageCount}
         listUser={listUser}
         handleClickBtnUpdate={handleClickBtnUpdate}
         handleClickBtnDelete={handleClickBtnDelete}
         fetchListUserWithPaninate={fetchListUserWithPaninate}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
       <ModalCreateUser
         fetchListUser={fetchListUser}
         show={showModalCreateUser}
         setShow={setShowModalCreateUser}
+        fetchListUserWithPaninate={fetchListUserWithPaninate}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
       <ModalUpdateUser
         resetDataUpdate={resetDataUpdate}
@@ -84,6 +85,9 @@ const ManageUser = () => {
         show={showModalUpdateUser}
         setShow={setShowModalUpdateUser}
         dataUpdate={dataUpdate}
+        fetchListUserWithPaninate={fetchListUserWithPaninate}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
       <ModalDeleteUser
         fetchListUser={fetchListUser}
@@ -91,6 +95,9 @@ const ManageUser = () => {
         setShow={setShowModalDeleteUser}
         dataDelete={dataDelete}
         handleDeleteUser={handleDeleteUser}
+        fetchListUserWithPaninate={fetchListUserWithPaninate}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
     </div>
   );
