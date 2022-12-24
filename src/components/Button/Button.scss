@@ -1,0 +1,13 @@
+.label-upload {
+  border-radius: 5px;
+  padding: 3px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #eeeeee;
+  width: fit-content;
+  cursor: pointer;
+  &:hover {
+    background-color: #dcdcdc;
+  }
+}

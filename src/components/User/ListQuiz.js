@@ -37,7 +37,6 @@ const ListQuiz = () => {
                 <button
                   className="btn btn-primary"
                   onClick={() => {
-                    console.log(quiz);
                     navigate(`/quiz/${quiz.id}`, {
                       state: {
                         quizTitle: quiz.description,

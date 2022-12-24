@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { FcPlus } from "react-icons/fc";
 import { toast } from "react-toastify";
 import { postCreateNewUser } from "../../../services/apiServices";
+import { UploadImage } from "../../Button/Button";
 
 const ModalCreateUser = (props) => {
   const { show, setShow } = props;
@@ -123,12 +123,9 @@ const ModalCreateUser = (props) => {
               </select>
             </div>
             <div className="col-md-12">
-              <label htmlFor="file" className="form-label label-upload">
-                <FcPlus />
-                Upload file image
-              </label>
+              <UploadImage htmlFor="file" />
+
               <input
-                // value={image}
                 onChange={(e) => {
                   handleUploadImage(e);
                 }}
