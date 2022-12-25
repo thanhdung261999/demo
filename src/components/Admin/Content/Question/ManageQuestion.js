@@ -3,7 +3,6 @@ import Select from "react-select";
 import { RiImageAddFill } from "react-icons/ri";
 import { v4 as uuidv4 } from "uuid";
 import { AiOutlineMinusCircle, AiFillPlusSquare } from "react-icons/ai";
-import _ from "lodash";
 import { BsFillPatchMinusFill, BsFillPatchPlusFill } from "react-icons/bs";
 import ImageViewer from "react-simple-image-viewer";
 import "./ManageQuestion.scss";
@@ -13,13 +12,11 @@ import {
   postCreateNewAnswerForQuestion,
   postCreateNewQuestionForQuiz,
 } from "../../../../services/apiServices";
-
+import _ from "lodash";
+import { toast } from "react-toastify";
 const ManageQuestion = (props) => {
   const indexImage = 0;
-  const [selectedQuiz, setSelectedQuiz] = useState({});
-  const [images, setImages] = useState([]);
-  const [showImage, setShowImage] = useState(false);
-  const [questions, setQuestion] = useState([
+  const initQuestions = [
     {
       id: uuidv4(),
       description: "",
@@ -34,7 +31,11 @@ const ManageQuestion = (props) => {
         },
       ],
     },
-  ]);
+  ];
+  const [questions, setQuestion] = useState(initQuestions);
+  const [selectedQuiz, setSelectedQuiz] = useState({});
+  const [images, setImages] = useState([]);
+  const [showImage, setShowImage] = useState(false);
   const [listQuiz, setListQuiz] = useState([]);
 
   useEffect(() => {
@@ -154,25 +155,62 @@ const ManageQuestion = (props) => {
     }
   };
   const handleSubmitQuestionForQuiz = async () => {
-    await Promise.all(
-      questions.map(async (question) => {
-        let q = await postCreateNewQuestionForQuiz(
-          +selectedQuiz.value,
-          question.description,
-          question.imageFile
-        );
-        await Promise.all(
-          question.answers.map(async (answer) => {
-            await postCreateNewAnswerForQuestion(
-              answer.description,
-              answer.isCorrect,
-              q.DT.id
-            );
-          })
-        );
-      })
-    );
+    // validate
+    if (_.isEmpty(selectedQuiz)) {
+      toast.error("Please choose the quiz");
+      return;
+    }
+    let lengthQuestion = questions.length;
+    let indexQ = 0;
+    let indexA = 0;
+    let isValidA = true;
+    for (let i = 0; i < lengthQuestion; i++) {
+      let lengthAnswer = questions[i].answers.length;
+      for (let j = 0; j < lengthAnswer; j++) {
+        if (!questions[i].answers[j].description) {
+          indexQ = i;
+          indexA = j;
+          isValidA = false;
+          break;
+        }
+      }
+      if (isValidA === false) {
+        break;
+      }
+    }
+    if (isValidA === false) {
+      toast.error(
+        `Not empty description for answer ${indexA + 1} of question ${
+          indexQ + 1
+        } `
+      );
+      return;
+    }
+    for (let i = 0; i < lengthQuestion; i++) {
+      if (!questions[i].description) {
+        toast.error(`Not empty description for question ${i + 1}`);
+        return;
+      }
+    }
   };
+  //
+  // for (const question of questions) {
+  //   // question
+  //   let q = await postCreateNewQuestionForQuiz(
+  //     +selectedQuiz.value,
+  //     question.description,
+  //     question.imageFile
+  //   );
+  //   // answer
+  //   for (const answer of question.answers) {
+  //     await postCreateNewAnswerForQuestion(
+  //       answer.description,
+  //       answer.isCorrect,
+  //       q.DT.id
+  //     );
+  //   }
+  // }
+  // };
   return (
     <div className="question-container">
       <div className="title">ManageQuestion</div>
@@ -196,7 +234,7 @@ const ManageQuestion = (props) => {
                   <div className="form-floating descripton">
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-control is-valid"
                       value={question.description}
                       onChange={(e) => {
                         handleOnchange("QUESTION", question.id, e.target.value);
