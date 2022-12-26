@@ -91,3 +91,12 @@ export const postCreateNewAnswerForQuestion = (
     question_id,
   });
 };
+export const postAssignQuiz = (quizId, userId) => {
+  return axios.post("api/v1/quiz-assign-to-user", {
+    quizId,
+    userId,
+  });
+};
+export const getQuizWithQA = (quizId) => {
+  return axios.get(`api/v1/quiz-with-qa/${quizId}`);
+};

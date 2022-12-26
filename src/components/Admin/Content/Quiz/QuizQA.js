@@ -5,17 +5,17 @@ import { v4 as uuidv4 } from "uuid";
 import { AiOutlineMinusCircle, AiFillPlusSquare } from "react-icons/ai";
 import { BsFillPatchMinusFill, BsFillPatchPlusFill } from "react-icons/bs";
 import ImageViewer from "react-simple-image-viewer";
-import "./ManageQuestion.scss";
+import "./QuizQA.scss";
 import { useEffect } from "react";
 import {
   getAllQuizForAdmin,
+  getQuizWithQA,
   postCreateNewAnswerForQuestion,
   postCreateNewQuestionForQuiz,
 } from "../../../../services/apiServices";
 import _ from "lodash";
 import { toast } from "react-toastify";
-const ManageQuestion = (props) => {
-  const indexImage = 0;
+const QuizQA = (props) => {
   const initQuestions = [
     {
       id: uuidv4(),
@@ -35,13 +35,53 @@ const ManageQuestion = (props) => {
     },
   ];
   const [questions, setQuestion] = useState(initQuestions);
-  const [selectedQuiz, setSelectedQuiz] = useState({});
   const [images, setImages] = useState([]);
+  const [imagesIndex, setImageIndex] = useState([]);
   const [showImage, setShowImage] = useState(false);
+  const [selectedQuiz, setSelectedQuiz] = useState({});
   const [listQuiz, setListQuiz] = useState([]);
+  const [currentImage, setCurrentImage] = useState(0);
   useEffect(() => {
     fetchAllQuiz();
   }, []);
+  useEffect(() => {
+    if (selectedQuiz && selectedQuiz.value) {
+      fetQuizWithQA();
+    }
+  }, [selectedQuiz]);
+  const fetQuizWithQA = async () => {
+    const res = await getQuizWithQA(selectedQuiz.value);
+    let newQA = [];
+    let imgs = [];
+    let imgsIndex = [];
+    if (res && res.EC === 0) {
+      setQuestion(res.DT.qa);
+      for (let i = 0; i < res.DT.qa.length; i++) {
+        let q = res.DT.qa[i];
+        if (q.imageFile) {
+          q.imageName = `Question-${q.id}.png`;
+          q.imageFile = await urltoFile(
+            `data:text/plain;base64,${q.imageFile}`,
+            `Question-${q.id}.png`,
+            "image/png"
+          );
+          let fileReader = new FileReader();
+          fileReader.readAsDataURL(q.imageFile);
+          fileReader.onloadend = (e) => {
+            imgs.push(e.target.result);
+            imgsIndex.push({
+              questionId: q.id,
+              imgFile: e.target.result,
+            });
+          };
+        }
+        newQA.push(q);
+      }
+      setImages(imgs);
+      setImageIndex(imgsIndex);
+      setQuestion(newQA);
+    }
+  };
   const fetchAllQuiz = async () => {
     const res = await getAllQuizForAdmin();
     if (res && res.EC === 0) {
@@ -54,6 +94,16 @@ const ManageQuestion = (props) => {
       setListQuiz(options);
     }
   };
+  //return a promise that resolves with a File instance
+  function urltoFile(url, filename, mimeType) {
+    return fetch(url)
+      .then(function (res) {
+        return res.arrayBuffer();
+      })
+      .then(function (buf) {
+        return new File([buf], filename, { type: mimeType });
+      });
+  }
   const handleAddRemoveQuestion = (type, id) => {
     if (type === "ADD") {
       const newQuestion = {
@@ -118,15 +168,44 @@ const ManageQuestion = (props) => {
       }
     }
   };
-  const handleOnchangeFileQuestion = (questionId, e) => {
+  const handleOnchangeFileQuestion = async (questionId, e) => {
+    // set imageFIle
     let questionClone = _.cloneDeep(questions);
     if (e.target && e.target.files && e.target.files[0]) {
       let index = questionClone.findIndex((item) => item.id === questionId);
       if (index > -1) {
         questionClone[index].imageFile = e.target.files[0];
         questionClone[index].imageName = e.target.files[0].name;
-        setQuestion(questionClone);
       }
+      // set data PreviewImage
+
+      let indexImg = imagesIndex.findIndex((item) => {
+        return item.questionId === questionId;
+      });
+      let stringBase64;
+      let fileReader = new FileReader();
+      fileReader.readAsDataURL(e.target.files[0]);
+      fileReader.onloadend = (e) => {
+        stringBase64 = e.target.result;
+        if (indexImg > -1) {
+          let imagesClone = _.cloneDeep(images);
+          let imagesIndexClone = _.cloneDeep(imagesIndex);
+          imagesClone[indexImg] = stringBase64;
+          setImages(imagesClone);
+          imagesIndexClone[indexImg].imgFile = stringBase64;
+          setImageIndex(imagesIndexClone);
+        } else {
+          setImageIndex((pre) => [
+            ...pre,
+            {
+              questionId: questionId,
+              imgFile: stringBase64,
+            },
+          ]);
+          setImages((pre) => [...pre, stringBase64]);
+        }
+      };
+      setQuestion(questionClone);
     }
   };
   const handleOnchangeAnswerQuestion = (type, questionId, answerId, value) => {
@@ -149,13 +228,16 @@ const ManageQuestion = (props) => {
     }
   };
   const handlePreviewImageQuestion = (questionId) => {
-    let questionClone = _.cloneDeep(questions);
-    let index = questionClone.findIndex((item) => item.id === questionId);
-    if (index > -1) {
-      if (questionClone[index].imageFile) {
-        const url = URL.createObjectURL(questionClone[index].imageFile);
-        setImages([url]);
-        setShowImage(true);
+    let q = questions.find((item) => item.id === questionId);
+    if (q && q.imageFile) {
+      if (imagesIndex && imagesIndex.length > 0) {
+        let index = imagesIndex.findIndex(
+          (item) => item.questionId === questionId
+        );
+        if (index > -1) {
+          setCurrentImage(index);
+          setShowImage(true);
+        }
       }
     }
   };
@@ -219,14 +301,13 @@ const ManageQuestion = (props) => {
         );
       }
     }
-    setQuestion(initQuestions);
-    toast.success("succes create Question for quiz");
   };
 
   return (
-    <div className="question-container">
-      <div className="title">ManageQuestion</div>
-      <hr />
+    <div
+      className="question-container"
+      key={selectedQuiz.value && selectedQuiz.value}
+    >
       <div className="add-new-question">
         <div className="col-6 mb-2">
           <label>Seleted Quiz:</label>
@@ -241,16 +322,12 @@ const ManageQuestion = (props) => {
           questions.length > 0 &&
           questions.map((question, index) => {
             return (
-              <div className="a-main mb-4" key={question.id}>
+              <div className="a-main mb-4" key={`question-${question.id}`}>
                 <div className="questions-content">
                   <div className="form-floating descripton">
                     <input
                       type="text"
-                      className={
-                        question.isValidQ
-                          ? "form-control"
-                          : "form-control is-invalid"
-                      }
+                      className={"form-control"}
                       value={question.description}
                       onChange={(e) => {
                         handleOnchange("QUESTION", question.id, e.target.value);
@@ -284,7 +361,7 @@ const ManageQuestion = (props) => {
                       <div className="image-lightbox">
                         <ImageViewer
                           src={images}
-                          currentIndex={indexImage}
+                          currentIndex={currentImage}
                           disableScroll={false}
                           closeOnClickOutside={true}
                           backgroundStyle={{ background: "rgba(0,0,0,0.95" }}
@@ -320,7 +397,10 @@ const ManageQuestion = (props) => {
                   question.answers.length > 0 &&
                   question.answers.map((answer, index) => {
                     return (
-                      <div className="answer-content" key={answer.id}>
+                      <div
+                        className="answer-content"
+                        key={`answer-${answer.id}`}
+                      >
                         <input
                           className="form-check-input"
                           type="checkbox"
@@ -338,11 +418,7 @@ const ManageQuestion = (props) => {
                           <input
                             type="text"
                             value={answer.description}
-                            className={
-                              answer.isValidA
-                                ? "form-control iscorrect"
-                                : "form-control iscorrect is-invalid"
-                            }
+                            className={"form-control iscorrect"}
                             onChange={(e) => {
                               handleOnchangeAnswerQuestion(
                                 "INPUT",
@@ -394,4 +470,4 @@ const ManageQuestion = (props) => {
     </div>
   );
 };
-export default ManageQuestion;
+export default QuizQA;
